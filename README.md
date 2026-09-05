@@ -76,6 +76,7 @@ Estos prompts también están guardados por separado en `prompts/system_prompt.m
 - Inicio limpio de la aplicación sin registros de ejemplo ni destino local preconfigurado.
 - Persistencia local mediante `localStorage`.
 - Diseño responsive y metadatos PWA para uso desde un celular.
+- Modo demo reproducible para evaluación: genera datos sintéticos, no llama a OpenAI, no autentica Google y no envía archivos personales.
 
 Para usar el agente:
 
@@ -83,6 +84,15 @@ Para usar el agente:
 $env:OPENAI_API_KEY="tu_api_key"
 py server.py
 ```
+
+Para evaluar la interfaz sin claves, sin Google y sin archivos personales, se puede ejecutar:
+
+```powershell
+$env:DEMO_MODE="1"
+py server.py
+```
+
+En modo demo el agente devuelve un comprobante sintético, permite editarlo y simula la confirmación sin escribir en ninguna planilla. Para volver al modo real, cerrar la terminal o ejecutar `$env:DEMO_MODE="0"` y configurar las variables privadas.
 
 Después se abre `http://127.0.0.1:8000`, se adjuntan uno o varios comprobantes, se elige **Analizar comprobantes**, se revisan y corrigen los campos editables de cada resultado y finalmente se registra el lote en Google Sheets.
 
@@ -108,7 +118,7 @@ La integración OAuth de Google quedó implementada, pero todavía falta probarl
 
 Todavía faltan las tres corridas reales documentadas en `corridas/`, el análisis económico de tokens y costos, la definición completa de niveles L0–L4, gobierno de permisos, riesgos y quién firma el resultado. También falta completar `DECISIONES.md` con la historia de iteraciones del trabajo.
 
-La prueba completa contra la API requiere una clave válida en `OPENAI_API_KEY` y saldo o permisos disponibles en la cuenta. La clave no debe escribirse en el frontend ni subirse al repositorio.
+La prueba completa contra la API requiere una clave válida en `OPENAI_API_KEY` y saldo o permisos disponibles en la cuenta. La clave no debe escribirse en el frontend ni subirse al repositorio. Los archivos personales de comprobantes quedan excluidos por `.gitignore`; `.env.example` documenta las variables necesarias sin valores reales.
 
 ## Qué aprendí
 

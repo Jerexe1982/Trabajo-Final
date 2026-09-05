@@ -14,6 +14,7 @@ ROOT = Path(__file__).parent
 HOST = os.getenv("HOST", "127.0.0.1")
 PORT = int(os.getenv("PORT", "8000"))
 MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+DEMO_MODE = os.getenv("DEMO_MODE", "0").lower() in {"1", "true", "yes", "demo"}
 MAX_BYTES = 10 * 1024 * 1024
 BATCH_MAX = 10
 API_URL = "https://api.openai.com/v1/responses"
@@ -27,6 +28,25 @@ oauth_state = None
 
 SYSTEM_PROMPT = (ROOT / "prompts" / "system_prompt.md").read_text(encoding="utf-8")
 USER_PROMPT = (ROOT / "prompts" / "user_prompt.md").read_text(encoding="utf-8")
+
+
+def demo_analysis(filename):
+    """Resultado sintético para evaluación local sin enviar archivos ni usar claves."""
+    return {
+        "estado": "listo",
+        "campos": {
+            "fecha": "2026-09-01",
+            "importe": 12500,
+            "moneda": "ARS",
+            "comercio_destinatario": "Comercio de demostración",
+            "cbu_destino": "Sin dato",
+            "medio_pago": "Tarjeta de demostración",
+            "categoria": "Alimentación",
+            "comentario": "Registro sintético para evaluación; no proviene del archivo.",
+        },
+        "observaciones": ["Modo demo activo: el contenido del archivo no se envió a ningún servicio."],
+        "preguntas": [],
+    }
 
 
 def json_response(handler, status, payload):
@@ -60,6 +80,8 @@ def parse_model_json(text):
 
 
 def analyze_receipt(payload):
+    if DEMO_MODE:
+        return demo_analysis(payload.get("filename", "comprobante"))
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("Falta OPENAI_API_KEY en el entorno del servidor.")
@@ -236,7 +258,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/api/health":
-            return json_response(self, 200, {"ok": True, "model": MODEL, "api_key_configured": bool(os.getenv("OPENAI_API_KEY")), "google_configured": bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)})
+            return json_response(self, 200, {"ok": True, "model": MODEL, "demo_mode": DEMO_MODE, "api_key_configured": bool(os.getenv("OPENAI_API_KEY")), "google_configured": bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)})
         if self.path.startswith("/api/google-auth-url"):
             try:
                 return json_response(self, 200, {"ok": True, "auth_url": google_auth_url()})
@@ -335,6 +357,8 @@ class Handler(BaseHTTPRequestHandler):
             length = int(self.headers.get("Content-Length", "0"))
             try:
                 payload = json.loads(self.rfile.read(length).decode("utf-8"))
+                if DEMO_MODE:
+                    return json_response(self, 200, {"ok": True, "saved": False, "demo": True, "message": "Modo demo: no se enviaron registros a Google Sheets."})
                 if not google_access_token():
                     return json_response(self, 401, {"ok": False, "auth_required": True, "auth_url": google_auth_url()})
                 result = append_to_google_sheet(payload)
