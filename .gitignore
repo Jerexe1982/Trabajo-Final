@@ -5,6 +5,7 @@ __pycache__/
 *.py[cod]
 Comprobantes/
 client_secret*.json
+credentials*.json
 token*.json
 *.pem
 *.key
