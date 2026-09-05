@@ -1,0 +1,1 @@
+Analizá el comprobante adjunto y prepará un registro de gasto siguiendo exactamente el contrato del system prompt. Priorizá la fidelidad al comprobante y señalá toda ambigüedad en observaciones o preguntas. Devolvé únicamente el JSON solicitado.

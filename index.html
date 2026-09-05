@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="receipts.css" />
     <link rel="stylesheet" href="mobile.css" />
+    <link rel="stylesheet" href="analysis.css" />
   </head>
   <body>
     <div class="shell">
@@ -48,6 +49,8 @@
             <label>Nota <input id="note" name="note" placeholder="Opcional" /></label>
             <div class="receipt-box"><div class="receipt-copy"><span class="receipt-icon">⌁</span><div><strong>Comprobante</strong><small id="attachment-status">Podés adjuntar una foto o un PDF</small></div></div><div class="receipt-actions"><label class="upload-btn">Importar archivo<input id="receipt-file" type="file" accept="image/*,.pdf,application/pdf" /></label><label class="camera-btn">Usar cámara<input id="receipt-camera" type="file" accept="image/*" capture="environment" /></label></div></div>
             <div id="attachment-preview" class="attachment-preview hidden"></div>
+            <button id="analyze-btn" class="analyze-btn" type="button" disabled>✦ Analizar comprobante</button>
+            <div id="analysis-result" class="analysis-result hidden" role="status"></div>
             <button class="primary-btn" type="submit">+ Registrar gasto</button>
           </form></article>
         </section>
