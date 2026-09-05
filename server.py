@@ -6,7 +6,7 @@ import secrets
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlencode, urlparse
+from urllib.parse import parse_qs, urlencode, urlparse, quote
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
@@ -20,7 +20,8 @@ API_URL = "https://api.openai.com/v1/responses"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", f"http://{HOST}:{PORT}/oauth2callback")
-GOOGLE_SCOPE = "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.readonly"
+GOOGLE_SCOPE = "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file"
+GOOGLE_FOLDER_NAME = os.getenv("GOOGLE_FOLDER_NAME", "Finanzas claras")
 google_tokens = None
 oauth_state = None
 
@@ -171,6 +172,46 @@ def list_google_sheets():
         return json.loads(response.read().decode("utf-8")).get("files", [])
 
 
+def google_request(method, endpoint, body=None):
+    token = google_access_token()
+    if not token:
+        return None
+    headers = {"Authorization": f"Bearer {token}"}
+    data = None
+    if body is not None:
+        headers["Content-Type"] = "application/json"
+        data = json.dumps(body).encode("utf-8")
+    request = Request(endpoint, data=data, headers=headers, method=method)
+    with urlopen(request, timeout=30) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def create_google_workspace(spreadsheet_name):
+    if not spreadsheet_name or len(spreadsheet_name.strip()) < 1:
+        raise ValueError("Indicá un nombre para la planilla de gastos.")
+    folder_query = f"name='{GOOGLE_FOLDER_NAME.replace(chr(39), chr(39) + chr(39))}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
+    folders = google_request("GET", "https://www.googleapis.com/drive/v3/files?" + urlencode({"q": folder_query, "spaces": "drive", "pageSize": "10", "fields": "files(id,name)"}))
+    folder_id = folders.get("files", [])[0].get("id") if folders and folders.get("files") else None
+    if not folder_id:
+        folder = google_request("POST", "https://www.googleapis.com/drive/v3/files", {"name": GOOGLE_FOLDER_NAME, "mimeType": "application/vnd.google-apps.folder"})
+        folder_id = folder["id"]
+    sheet = google_request("POST", "https://sheets.googleapis.com/v4/spreadsheets", {"properties": {"title": spreadsheet_name.strip()}})
+    spreadsheet_id = sheet["spreadsheetId"]
+    current = google_request("GET", f"https://www.googleapis.com/drive/v3/files/{quote(spreadsheet_id)}?fields=parents") or {}
+    remove_parents = ",".join(current.get("parents", []))
+    move_params = {"addParents": folder_id, "fields": "id,name,parents,webViewLink"}
+    if remove_parents:
+        move_params["removeParents"] = remove_parents
+    google_request("PATCH", f"https://www.googleapis.com/drive/v3/files/{quote(spreadsheet_id)}?{urlencode(move_params)}", {})
+    return {"folder_id": folder_id, "folder_name": GOOGLE_FOLDER_NAME, "spreadsheet_id": spreadsheet_id, "spreadsheet_name": spreadsheet_name.strip()}
+
+
+def read_google_sheet(spreadsheet_id):
+    if not spreadsheet_id:
+        raise ValueError("Falta el identificador de la planilla.")
+    return google_request("GET", f"https://sheets.googleapis.com/v4/spreadsheets/{quote(spreadsheet_id)}/values/A:H")
+
+
 def analyze_receipts(payload):
     documents = payload.get("documents", [])
     if not documents or len(documents) > BATCH_MAX:
@@ -211,6 +252,18 @@ class Handler(BaseHTTPRequestHandler):
                 return json_response(self, 502, {"ok": False, "error": "Google Drive no pudo listar tus planillas.", "detail": detail[:500]})
             except Exception as exc:
                 return json_response(self, 500, {"ok": False, "error": str(exc)})
+        if self.path.startswith("/api/google-read"):
+            try:
+                query = parse_qs(urlparse(self.path).query)
+                spreadsheet_id = query.get("spreadsheet_id", [""])[0]
+                if not google_access_token():
+                    return json_response(self, 401, {"ok": False, "auth_required": True, "auth_url": google_auth_url()})
+                return json_response(self, 200, {"ok": True, "data": read_google_sheet(spreadsheet_id)})
+            except HTTPError as exc:
+                detail = exc.read().decode("utf-8", errors="replace")
+                return json_response(self, 502, {"ok": False, "error": "Google Sheets no pudo leer la planilla.", "detail": detail[:500]})
+            except Exception as exc:
+                return json_response(self, 500, {"ok": False, "error": str(exc)})
         if self.path.startswith("/oauth2callback"):
             query = parse_qs(urlparse(self.path).query)
             state = query.get("state", [""])[0]
@@ -248,6 +301,20 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_POST(self):
+        if self.path == "/api/google-setup":
+            length = int(self.headers.get("Content-Length", "0"))
+            try:
+                payload = json.loads(self.rfile.read(length).decode("utf-8"))
+                if not google_access_token():
+                    return json_response(self, 401, {"ok": False, "auth_required": True, "auth_url": google_auth_url()})
+                return json_response(self, 200, {"ok": True, "workspace": create_google_workspace(payload.get("spreadsheet_name", ""))})
+            except HTTPError as exc:
+                detail = exc.read().decode("utf-8", errors="replace")
+                return json_response(self, 502, {"ok": False, "error": "Google no pudo crear la carpeta o la planilla.", "detail": detail[:500]})
+            except (ValueError, json.JSONDecodeError) as exc:
+                return json_response(self, 400, {"ok": False, "error": str(exc)})
+            except Exception as exc:
+                return json_response(self, 500, {"ok": False, "error": str(exc)})
         if self.path == "/api/analyze-receipts":
             length = int(self.headers.get("Content-Length", "0"))
             if length > MAX_BYTES * BATCH_MAX * 2:
