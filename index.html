@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Seguimiento personal de gastos y resumen mensual." />
+    <title>Finanzas claras · Seguimiento de gastos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <a class="brand" href="#inicio" aria-label="Ir al inicio"><span class="brand-mark">$</span><span>Finanzas <em>claras</em></span></a>
+        <nav class="main-nav" aria-label="Navegación principal">
+          <a class="active" href="#inicio">Resumen</a>
+          <a href="#movimientos">Movimientos</a>
+        </nav>
+        <button class="avatar" type="button" title="Perfil">EP</button>
+      </header>
+
+      <main id="inicio">
+        <section class="welcome-row">
+          <div><p class="eyebrow">Panel personal</p><h1>Tu dinero, <span>bajo control.</span></h1><p class="muted">Una mirada clara a lo que gastás y a dónde va cada peso.</p></div>
+          <div class="month-control"><label for="month-picker">Período</label><input id="month-picker" type="month" /></div>
+        </section>
+
+        <section class="metrics" aria-label="Resumen del período">
+          <article class="metric-card accent"><div class="metric-head"><span>Total gastado</span><span class="metric-icon">↗</span></div><strong id="total-spent">$0</strong><p id="comparison" class="trend positive">—</p></article>
+          <article class="metric-card"><div class="metric-head"><span>Movimientos</span><span class="metric-icon soft">#</span></div><strong id="movement-count">0</strong><p class="metric-note">registros en el período</p></article>
+          <article class="metric-card"><div class="metric-head"><span>Mayor categoría</span><span class="metric-icon soft">◎</span></div><strong id="top-category">—</strong><p id="top-category-value" class="metric-note">Sin movimientos todavía</p></article>
+        </section>
+
+        <section class="content-grid">
+          <article class="panel chart-panel"><div class="panel-title"><div><p class="eyebrow">Distribución</p><h2>¿En qué se fue tu plata?</h2></div><span id="chart-total" class="panel-total">$0</span></div><div id="category-chart" class="category-chart" aria-label="Gastos por categoría"></div><div id="chart-empty" class="empty small">Agregá tu primer gasto para ver la distribución.</div></article>
+          <article class="panel quick-panel"><div class="panel-title"><div><p class="eyebrow">Carga rápida</p><h2>Nuevo gasto</h2></div><span class="spark">✦</span></div><form id="expense-form">
+            <div class="form-row"><label>Descripción<input id="description" name="description" required placeholder="Ej. Supermercado" /></label><label>Importe<input id="amount" name="amount" type="number" min="0.01" step="0.01" required placeholder="0,00" /></label></div>
+            <div class="form-row"><label>Categoría<select id="category" name="category"><option>Alimentación</option><option>Transporte</option><option>Vivienda y servicios</option><option>Salud</option><option>Educación</option><option>Entretenimiento</option><option>Indumentaria</option><option>Impuestos y tasas</option><option>Otros</option></select></label><label>Fecha<input id="date" name="date" type="date" required /></label></div>
+            <label>Nota <input id="note" name="note" placeholder="Opcional" /></label><button class="primary-btn" type="submit">+ Registrar gasto</button>
+          </form></article>
+        </section>
+
+        <section id="movimientos" class="panel movements-panel"><div class="panel-title movements-title"><div><p class="eyebrow">Actividad reciente</p><h2>Movimientos del período</h2></div><div class="table-actions"><input id="search" type="search" placeholder="Buscar…" aria-label="Buscar gastos" /><button id="export-btn" class="ghost-btn" type="button">Exportar JSON</button></div></div><div class="table-wrap"><table><thead><tr><th>Descripción</th><th>Categoría</th><th>Fecha</th><th class="align-right">Importe</th><th></th></tr></thead><tbody id="expense-table"></tbody></table><div id="table-empty" class="empty">No hay gastos en este período.</div></div></section>
+      </main>
+      <footer><span>Finanzas claras · V1</span><span>Los datos se guardan en este navegador</span></footer>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
