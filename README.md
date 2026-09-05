@@ -5,12 +5,16 @@ Aplicación web de seguimiento personal de gastos y resumen mensual.
 ## Funcionalidades actuales
 
 - Registro de gastos con descripción, importe, categoría, fecha y nota.
+- Importación de comprobantes desde imágenes o PDF.
+- Acceso a la cámara del celular mediante captura directa de imágenes.
 - Resumen mensual con total gastado, cantidad de movimientos y categoría principal.
 - Distribución visual de gastos por categoría.
 - Historial filtrable y buscable.
 - Eliminación de registros.
 - Exportación del período seleccionado a JSON.
 - Persistencia local en el navegador mediante `localStorage`.
+
+El comprobante queda asociado al registro mediante su nombre, tipo y tamaño. En esta versión la aplicación todavía no interpreta automáticamente la imagen o el PDF: esa tarea corresponde a la próxima integración con el agente.
 
 ## Cómo probarla
 

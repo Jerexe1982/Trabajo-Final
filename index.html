@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="receipts.css" />
   </head>
   <body>
     <div class="shell">
@@ -38,7 +39,10 @@
           <article class="panel quick-panel"><div class="panel-title"><div><p class="eyebrow">Carga rápida</p><h2>Nuevo gasto</h2></div><span class="spark">✦</span></div><form id="expense-form">
             <div class="form-row"><label>Descripción<input id="description" name="description" required placeholder="Ej. Supermercado" /></label><label>Importe<input id="amount" name="amount" type="number" min="0.01" step="0.01" required placeholder="0,00" /></label></div>
             <div class="form-row"><label>Categoría<select id="category" name="category"><option>Alimentación</option><option>Transporte</option><option>Vivienda y servicios</option><option>Salud</option><option>Educación</option><option>Entretenimiento</option><option>Indumentaria</option><option>Impuestos y tasas</option><option>Otros</option></select></label><label>Fecha<input id="date" name="date" type="date" required /></label></div>
-            <label>Nota <input id="note" name="note" placeholder="Opcional" /></label><button class="primary-btn" type="submit">+ Registrar gasto</button>
+            <label>Nota <input id="note" name="note" placeholder="Opcional" /></label>
+            <div class="receipt-box"><div class="receipt-copy"><span class="receipt-icon">⌁</span><div><strong>Comprobante</strong><small id="attachment-status">Podés adjuntar una foto o un PDF</small></div></div><div class="receipt-actions"><label class="upload-btn">Importar archivo<input id="receipt-file" type="file" accept="image/*,.pdf,application/pdf" /></label><label class="camera-btn">Usar cámara<input id="receipt-camera" type="file" accept="image/*" capture="environment" /></label></div></div>
+            <div id="attachment-preview" class="attachment-preview hidden"></div>
+            <button class="primary-btn" type="submit">+ Registrar gasto</button>
           </form></article>
         </section>
 
