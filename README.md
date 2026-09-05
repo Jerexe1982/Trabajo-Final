@@ -7,6 +7,7 @@ Aplicación web de seguimiento personal de gastos y resumen mensual.
 - Registro de gastos con descripción, importe, categoría, fecha y nota.
 - Importación de comprobantes desde imágenes o PDF.
 - Acceso a la cámara del celular mediante captura directa de imágenes.
+- Captura directa desde la webcam de la computadora mediante `getUserMedia`, con alternativa al selector de archivos.
 - Diseño responsive y controles táctiles para uso desde celular.
 - Metadatos PWA para agregar la aplicación a la pantalla de inicio.
 - Análisis de comprobantes mediante un servidor local y la Responses API.

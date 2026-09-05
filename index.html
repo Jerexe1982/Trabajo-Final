@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="receipts.css" />
     <link rel="stylesheet" href="mobile.css" />
     <link rel="stylesheet" href="analysis.css" />
+    <link rel="stylesheet" href="camera.css" />
   </head>
   <body>
     <div class="shell">
@@ -47,7 +48,7 @@
             <div class="form-row"><label>Descripción<input id="description" name="description" autocomplete="off" required placeholder="Ej. Supermercado" /></label><label>Importe<input id="amount" name="amount" inputmode="decimal" type="number" min="0.01" step="0.01" required placeholder="0,00" /></label></div>
             <div class="form-row"><label>Categoría<select id="category" name="category"><option>Alimentación</option><option>Transporte</option><option>Vivienda y servicios</option><option>Salud</option><option>Educación</option><option>Entretenimiento</option><option>Indumentaria</option><option>Impuestos y tasas</option><option>Otros</option></select></label><label>Fecha<input id="date" name="date" type="date" required /></label></div>
             <label>Nota <input id="note" name="note" placeholder="Opcional" /></label>
-            <div class="receipt-box"><div class="receipt-copy"><span class="receipt-icon">⌁</span><div><strong>Comprobante</strong><small id="attachment-status">Podés adjuntar una foto o un PDF</small></div></div><div class="receipt-actions"><label class="upload-btn">Importar archivo<input id="receipt-file" type="file" accept="image/*,.pdf,application/pdf" /></label><label class="camera-btn">Usar cámara<input id="receipt-camera" type="file" accept="image/*" capture="environment" /></label></div></div>
+            <div class="receipt-box"><div class="receipt-copy"><span class="receipt-icon">⌁</span><div><strong>Comprobante</strong><small id="attachment-status">Podés adjuntar una foto o un PDF</small></div></div><div class="receipt-actions"><label class="upload-btn">Importar archivo<input id="receipt-file" type="file" accept="image/*,.pdf,application/pdf" /></label><button id="open-camera-btn" class="camera-btn" type="button">Usar cámara</button><input id="receipt-camera" type="file" accept="image/*" capture="environment" hidden /></div></div>
             <div id="attachment-preview" class="attachment-preview hidden"></div>
             <button id="analyze-btn" class="analyze-btn" type="button" disabled>✦ Analizar comprobante</button>
             <div id="analysis-result" class="analysis-result hidden" role="status"></div>
@@ -57,6 +58,7 @@
 
         <section id="movimientos" class="panel movements-panel"><div class="panel-title movements-title"><div><p class="eyebrow">Actividad reciente</p><h2>Movimientos del período</h2></div><div class="table-actions"><input id="search" type="search" placeholder="Buscar…" aria-label="Buscar gastos" /><button id="export-btn" class="ghost-btn" type="button">Exportar JSON</button></div></div><div class="table-wrap"><table><thead><tr><th>Descripción</th><th>Categoría</th><th>Fecha</th><th class="align-right">Importe</th><th></th></tr></thead><tbody id="expense-table"></tbody></table><div id="table-empty" class="empty">No hay gastos en este período.</div></div></section>
       </main>
+      <div id="camera-modal" class="camera-modal hidden" role="dialog" aria-modal="true" aria-labelledby="camera-title"><div class="camera-card"><div class="camera-header"><h2 id="camera-title">Fotografiar comprobante</h2><button id="close-camera-btn" class="close-camera" type="button" aria-label="Cerrar cámara">×</button></div><video id="camera-video" autoplay playsinline></video><canvas id="camera-canvas" class="hidden"></canvas><div class="camera-actions"><button id="take-photo-btn" class="primary-btn" type="button">Tomar foto</button><button id="cancel-camera-btn" class="ghost-btn" type="button">Cancelar</button></div></div></div>
       <footer><span>Finanzas claras · V1</span><span>Los datos se guardan en este navegador</span></footer>
     </div>
     <script src="app.js"></script>
