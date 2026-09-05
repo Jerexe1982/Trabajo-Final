@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="analysis.css" />
     <link rel="stylesheet" href="camera.css" />
     <link rel="stylesheet" href="sheets.css" />
+    <link rel="stylesheet" href="batch.css" />
   </head>
   <body>
     <div class="shell">
@@ -50,9 +51,9 @@
             <div class="form-row"><label>Categoría<select id="category" name="category"><option>Alimentación</option><option>Transporte</option><option>Vivienda y servicios</option><option>Salud</option><option>Educación</option><option>Entretenimiento</option><option>Indumentaria</option><option>Impuestos y tasas</option><option>Otros</option></select></label><label>Fecha<input id="date" name="date" type="date" required /></label></div>
             <label>URL de Google Sheets<input id="sheet-url" name="sheet_url" type="url" required placeholder="https://docs.google.com/spreadsheets/d/..." /></label>
             <label>Nota <input id="note" name="note" placeholder="Opcional" /></label>
-            <div class="receipt-box"><div class="receipt-copy"><span class="receipt-icon">⌁</span><div><strong>Comprobante</strong><small id="attachment-status">Podés adjuntar una foto o un PDF</small></div></div><div class="receipt-actions"><label class="upload-btn">Importar archivo<input id="receipt-file" type="file" accept="image/*,.pdf,application/pdf" /></label><button id="open-camera-btn" class="camera-btn" type="button">Usar cámara</button><input id="receipt-camera" type="file" accept="image/*" capture="environment" hidden /></div></div>
+            <div class="receipt-box"><div class="receipt-copy"><span class="receipt-icon">⌁</span><div><strong>Comprobantes · hasta 10</strong><small id="attachment-status">Podés seleccionar varias imágenes o PDF</small></div></div><div class="receipt-actions"><label class="upload-btn">Importar archivos<input id="receipt-file" type="file" accept="image/*,.pdf,application/pdf" multiple /></label><button id="open-camera-btn" class="camera-btn" type="button">Usar cámara</button><input id="receipt-camera" type="file" accept="image/*" capture="environment" hidden /></div></div>
             <div id="attachment-preview" class="attachment-preview hidden"></div>
-            <button id="analyze-btn" class="analyze-btn" type="button" disabled>✦ Analizar comprobante</button>
+            <button id="analyze-btn" class="analyze-btn" type="button" disabled>✦ Analizar comprobantes</button>
             <div id="analysis-result" class="analysis-result hidden" role="status"></div>
             <button class="primary-btn" type="submit">+ Guardar en Google Sheets</button>
             <div id="save-status" class="save-status hidden" role="status"></div>

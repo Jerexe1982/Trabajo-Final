@@ -15,6 +15,7 @@ HOST = os.getenv("HOST", "127.0.0.1")
 PORT = int(os.getenv("PORT", "8000"))
 MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
 MAX_BYTES = 10 * 1024 * 1024
+BATCH_MAX = 10
 API_URL = "https://api.openai.com/v1/responses"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
@@ -149,12 +150,26 @@ def append_to_google_sheet(payload):
     if not token:
         return None
     spreadsheet_id = spreadsheet_id_from_url(payload.get("sheet_url", ""))
-    fields = payload.get("expense", {})
-    row = [[fields.get("date", ""), fields.get("amount", ""), fields.get("currency", "ARS"), fields.get("description", ""), fields.get("cbu", "Sin dato"), fields.get("payment_method", "Sin dato"), fields.get("category", ""), fields.get("note", "")]]
+    expenses = payload.get("expenses") or [payload.get("expense", {})]
+    if not expenses or len(expenses) > BATCH_MAX:
+        raise ValueError("El lote debe contener entre 1 y 10 registros.")
+    row = [[expense.get("date", ""), expense.get("amount", ""), expense.get("currency", "ARS"), expense.get("description", ""), expense.get("cbu", "Sin dato"), expense.get("payment_method", "Sin dato"), expense.get("category", ""), expense.get("note", "")] for expense in expenses]
     endpoint = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/A:H:append?{urlencode({'valueInputOption':'USER_ENTERED','insertDataOption':'INSERT_ROWS'})}"
     request = Request(endpoint, data=json.dumps({"majorDimension": "ROWS", "values": row}).encode("utf-8"), headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, method="POST")
     with urlopen(request, timeout=30) as response:
         return json.loads(response.read().decode("utf-8"))
+
+
+def analyze_receipts(payload):
+    documents = payload.get("documents", [])
+    if not documents or len(documents) > BATCH_MAX:
+        raise ValueError("El lote debe contener entre 1 y 10 comprobantes.")
+    results = []
+    for document in documents:
+        result = analyze_receipt(document)
+        result["archivo"] = document.get("filename", "comprobante")
+        results.append(result)
+    return results
 
 
 def auth_popup_html(message):
@@ -211,6 +226,21 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_POST(self):
+        if self.path == "/api/analyze-receipts":
+            length = int(self.headers.get("Content-Length", "0"))
+            if length > MAX_BYTES * BATCH_MAX * 2:
+                return json_response(self, 413, {"ok": False, "error": "El lote supera el tamaño máximo permitido."})
+            try:
+                payload = json.loads(self.rfile.read(length).decode("utf-8"))
+                result = analyze_receipts(payload)
+                return json_response(self, 200, {"ok": True, "results": result, "count": len(result), "model": MODEL})
+            except (ValueError, json.JSONDecodeError) as exc:
+                return json_response(self, 400, {"ok": False, "error": str(exc)})
+            except HTTPError as exc:
+                detail = exc.read().decode("utf-8", errors="replace")
+                return json_response(self, 502, {"ok": False, "error": "La API rechazó uno de los comprobantes.", "detail": detail[:500]})
+            except Exception as exc:
+                return json_response(self, 500, {"ok": False, "error": str(exc)})
         if self.path == "/api/google-save":
             length = int(self.headers.get("Content-Length", "0"))
             try:
