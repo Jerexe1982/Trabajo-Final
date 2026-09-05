@@ -72,7 +72,7 @@ def analyze_receipt(payload):
     if len(raw) > MAX_BYTES:
         raise ValueError("El comprobante supera el límite de 10 MB.")
     if mime_type == "application/pdf":
-        content_part = {"type": "input_file", "filename": filename, "file_data": f"data:application/pdf;base64,{encoded}"}
+        content_part = {"type": "input_file", "filename": filename, "file_data": encoded}
     elif mime_type.startswith("image/"):
         content_part = {"type": "input_image", "detail": "high", "image_url": f"data:{mime_type};base64,{encoded}"}
     else:
