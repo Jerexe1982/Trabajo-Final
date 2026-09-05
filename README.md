@@ -77,6 +77,7 @@ Estos prompts también están guardados por separado en `prompts/system_prompt.m
 - Persistencia local mediante `localStorage`.
 - Diseño responsive y metadatos PWA para uso desde un celular.
 - Modo demo reproducible para evaluación: genera datos sintéticos, no llama a OpenAI, no autentica Google y no envía archivos personales.
+- Contrato operativo de seis piezas y matriz de supervisión humana L0–L4 documentados en `DECISIONES.md`.
 
 Para usar el agente:
 
@@ -116,7 +117,7 @@ La aplicación mantiene una copia local de los gastos confirmados en el navegado
 
 La integración OAuth de Google quedó implementada, pero todavía falta probarla con un cliente OAuth propio, una planilla de prueba, la creación automática de carpeta y una corrida real de lectura/escritura en lote. Para crear y listar archivos se agregan los alcances de Drive correspondientes. El token se mantiene en memoria durante la ejecución actual del servidor; al reiniciar, Google volverá a solicitar autorización.
 
-Todavía faltan las tres corridas reales documentadas en `corridas/`, el análisis económico de tokens y costos, la definición completa de niveles L0–L4, gobierno de permisos, riesgos y quién firma el resultado. También falta completar `DECISIONES.md` con la historia de iteraciones del trabajo.
+Todavía faltan las tres corridas reales documentadas en `corridas/`, el análisis económico detallado de tokens y costos y una prueba real de publicación multiusuario. La matriz de niveles, permisos, riesgos y firma quedó documentada en `DECISIONES.md`.
 
 La prueba completa contra la API requiere una clave válida en `OPENAI_API_KEY` y saldo o permisos disponibles en la cuenta. La clave no debe escribirse en el frontend ni subirse al repositorio. Los archivos personales de comprobantes quedan excluidos por `.gitignore`; `.env.example` documenta las variables necesarias sin valores reales.
 
