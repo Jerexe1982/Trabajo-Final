@@ -20,7 +20,7 @@ API_URL = "https://api.openai.com/v1/responses"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", f"http://{HOST}:{PORT}/oauth2callback")
-GOOGLE_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
+GOOGLE_SCOPE = "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.readonly"
 google_tokens = None
 oauth_state = None
 
@@ -149,7 +149,7 @@ def append_to_google_sheet(payload):
     token = google_access_token()
     if not token:
         return None
-    spreadsheet_id = spreadsheet_id_from_url(payload.get("sheet_url", ""))
+    spreadsheet_id = payload.get("spreadsheet_id") or spreadsheet_id_from_url(payload.get("sheet_url", ""))
     expenses = payload.get("expenses") or [payload.get("expense", {})]
     if not expenses or len(expenses) > BATCH_MAX:
         raise ValueError("El lote debe contener entre 1 y 10 registros.")
@@ -158,6 +158,17 @@ def append_to_google_sheet(payload):
     request = Request(endpoint, data=json.dumps({"majorDimension": "ROWS", "values": row}).encode("utf-8"), headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, method="POST")
     with urlopen(request, timeout=30) as response:
         return json.loads(response.read().decode("utf-8"))
+
+
+def list_google_sheets():
+    token = google_access_token()
+    if not token:
+        return None
+    query = "mimeType='application/vnd.google-apps.spreadsheet' and trashed=false"
+    params = urlencode({"q": query, "pageSize": "100", "orderBy": "modifiedTime desc", "fields": "files(id,name,mimeType,modifiedTime,webViewLink)"})
+    request = Request(f"https://www.googleapis.com/drive/v3/files?{params}", headers={"Authorization": f"Bearer {token}"}, method="GET")
+    with urlopen(request, timeout=30) as response:
+        return json.loads(response.read().decode("utf-8")).get("files", [])
 
 
 def analyze_receipts(payload):
@@ -187,6 +198,17 @@ class Handler(BaseHTTPRequestHandler):
         if self.path.startswith("/api/google-auth-url"):
             try:
                 return json_response(self, 200, {"ok": True, "auth_url": google_auth_url()})
+            except Exception as exc:
+                return json_response(self, 500, {"ok": False, "error": str(exc)})
+        if self.path.startswith("/api/google-files"):
+            try:
+                files = list_google_sheets()
+                if files is None:
+                    return json_response(self, 401, {"ok": False, "auth_required": True, "auth_url": google_auth_url()})
+                return json_response(self, 200, {"ok": True, "files": files})
+            except HTTPError as exc:
+                detail = exc.read().decode("utf-8", errors="replace")
+                return json_response(self, 502, {"ok": False, "error": "Google Drive no pudo listar tus planillas.", "detail": detail[:500]})
             except Exception as exc:
                 return json_response(self, 500, {"ok": False, "error": str(exc)})
         if self.path.startswith("/oauth2callback"):

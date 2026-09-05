@@ -59,11 +59,12 @@ Estos prompts también están guardados por separado en `prompts/system_prompt.m
 - Importación de imágenes y archivos PDF.
 - Captura directa desde la cámara del celular o la webcam de la computadora.
 - Análisis multimodal mediante `server.py` y la Responses API.
-- Solicitud de URL de Google Sheets antes de guardar.
+- Selección de la planilla de destino desde los archivos de Google Drive después de autenticarte; la URL queda como alternativa opcional.
 - Autenticación OAuth de Google en una ventana emergente.
 - Escritura de la fila confirmada mediante `spreadsheets.values.append`.
 - Selección, análisis y carga en lote de hasta 10 comprobantes por operación.
 - Una única autorización de Google para el lote completo.
+- Importación de un archivo JSON previamente analizado para cargar gastos completos en la aplicación.
 - Devolución de un JSON estructurado con ocho campos.
 - Marcado de resultados como `listo` o `requiere_revision`.
 - Revisión humana antes de registrar el gasto.
@@ -87,7 +88,9 @@ $env:GOOGLE_CLIENT_SECRET="tu_client_secret"
 py server.py
 ```
 
-Al guardar, Google administra la contraseña, la clave y la autenticación. La aplicación nunca solicita ni almacena esas credenciales. Si se seleccionan varios comprobantes, se analiza cada documento y se agregan todas las filas en una única operación de guardado.
+Al guardar, Google administra la contraseña, la clave y la autenticación. La aplicación nunca solicita ni almacena esas credenciales. Si no se pega una URL, después de autorizar se listan las planillas disponibles y se elige una. Si se seleccionan varios comprobantes, se analiza cada documento y se agregan todas las filas en una única operación de guardado.
+
+El botón **Importar JSON** permite seleccionar un archivo exportado o previamente analizado. La aplicación reconoce listas de gastos y carga sus registros completos en el resumen mensual.
 
 ## Qué falta o qué falló
 
@@ -95,7 +98,7 @@ La primera versión abría el explorador de archivos al elegir la opción de cá
 
 La aplicación todavía guarda los datos en el navegador y no en una base de datos multiusuario. La integración anterior con Google Sheets fue probada en el proyecto de la Entrega 1, pero todavía no está conectada automáticamente a esta aplicación.
 
-La integración OAuth de Google quedó implementada, pero todavía falta probarla con un cliente OAuth propio, una planilla de prueba y una corrida real de escritura en lote. El token se mantiene en memoria durante la ejecución actual del servidor; al reiniciar, Google volverá a solicitar autorización.
+La integración OAuth de Google quedó implementada, pero todavía falta probarla con un cliente OAuth propio, una planilla de prueba y una corrida real de escritura en lote. Para listar archivos se agrega el alcance de lectura de Drive. El token se mantiene en memoria durante la ejecución actual del servidor; al reiniciar, Google volverá a solicitar autorización.
 
 Todavía faltan las tres corridas reales documentadas en `corridas/`, el análisis económico de tokens y costos, la definición completa de niveles L0–L4, gobierno de permisos, riesgos y quién firma el resultado. También falta completar `DECISIONES.md` con la historia de iteraciones del trabajo.
 
