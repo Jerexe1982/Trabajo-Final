@@ -59,6 +59,9 @@ Estos prompts también están guardados por separado en `prompts/system_prompt.m
 - Importación de imágenes y archivos PDF.
 - Captura directa desde la cámara del celular o la webcam de la computadora.
 - Análisis multimodal mediante `server.py` y la Responses API.
+- Solicitud de URL de Google Sheets antes de guardar.
+- Autenticación OAuth de Google en una ventana emergente.
+- Escritura de la fila confirmada mediante `spreadsheets.values.append`.
 - Devolución de un JSON estructurado con ocho campos.
 - Marcado de resultados como `listo` o `requiere_revision`.
 - Revisión humana antes de registrar el gasto.
@@ -74,11 +77,23 @@ py server.py
 
 Después se abre `http://127.0.0.1:8000`, se adjunta un comprobante, se elige **Analizar comprobante**, se revisan los campos y finalmente se registra el gasto.
 
+Para habilitar Google Sheets también hay que configurar en Google Cloud un cliente OAuth para aplicación web, activar Google Sheets API y registrar exactamente `http://127.0.0.1:8000/oauth2callback` como URI de redirección. Luego se ejecuta:
+
+```powershell
+$env:GOOGLE_CLIENT_ID="tu_client_id"
+$env:GOOGLE_CLIENT_SECRET="tu_client_secret"
+py server.py
+```
+
+Al guardar, Google administra la contraseña, la clave y la autenticación. La aplicación nunca solicita ni almacena esas credenciales.
+
 ## Qué falta o qué falló
 
 La primera versión abría el explorador de archivos al elegir la opción de cámara en la computadora. El motivo fue que `capture="environment"` funciona principalmente como captura directa en celulares y no inicializa necesariamente la webcam en un navegador de escritorio. Se corrigió agregando `getUserMedia`, una vista previa de cámara y un botón para tomar la foto.
 
 La aplicación todavía guarda los datos en el navegador y no en una base de datos multiusuario. La integración anterior con Google Sheets fue probada en el proyecto de la Entrega 1, pero todavía no está conectada automáticamente a esta aplicación.
+
+La integración OAuth de Google quedó implementada, pero todavía falta probarla con un cliente OAuth propio, una planilla de prueba y una corrida real de escritura. El token se mantiene en memoria durante la ejecución actual del servidor; al reiniciar, Google volverá a solicitar autorización.
 
 Todavía faltan las tres corridas reales documentadas en `corridas/`, el análisis económico de tokens y costos, la definición completa de niveles L0–L4, gobierno de permisos, riesgos y quién firma el resultado. También falta completar `DECISIONES.md` con la historia de iteraciones del trabajo.
 

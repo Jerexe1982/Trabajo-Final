@@ -1,8 +1,12 @@
 import base64
 import json
 import os
+import re
+import secrets
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import parse_qs, urlencode, urlparse
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
@@ -12,6 +16,12 @@ PORT = int(os.getenv("PORT", "8000"))
 MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
 MAX_BYTES = 10 * 1024 * 1024
 API_URL = "https://api.openai.com/v1/responses"
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", f"http://{HOST}:{PORT}/oauth2callback")
+GOOGLE_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
+google_tokens = None
+oauth_state = None
 
 SYSTEM_PROMPT = (ROOT / "prompts" / "system_prompt.md").read_text(encoding="utf-8")
 USER_PROMPT = (ROOT / "prompts" / "user_prompt.md").read_text(encoding="utf-8")
@@ -77,13 +87,115 @@ def analyze_receipt(payload):
     return parse_model_json(extract_output_text(result))
 
 
+def spreadsheet_id_from_url(value):
+    match = re.search(r"docs\.google\.com/spreadsheets/d/([a-zA-Z0-9_-]+)", value or "")
+    if match:
+        return match.group(1)
+    if re.fullmatch(r"[a-zA-Z0-9_-]{20,}", value or ""):
+        return value
+    raise ValueError("Pegá una URL válida de Google Sheets.")
+
+
+def google_auth_url():
+    global oauth_state
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+        raise RuntimeError("Faltan GOOGLE_CLIENT_ID y GOOGLE_CLIENT_SECRET en el entorno del servidor.")
+    oauth_state = secrets.token_urlsafe(32)
+    params = {
+        "client_id": GOOGLE_CLIENT_ID,
+        "redirect_uri": GOOGLE_REDIRECT_URI,
+        "response_type": "code",
+        "scope": GOOGLE_SCOPE,
+        "access_type": "offline",
+        "include_granted_scopes": "true",
+        "prompt": "select_account consent",
+        "state": oauth_state,
+    }
+    return "https://accounts.google.com/o/oauth2/v2/auth?" + urlencode(params)
+
+
+def exchange_google_code(code):
+    global google_tokens
+    form = urlencode({"code": code, "client_id": GOOGLE_CLIENT_ID, "client_secret": GOOGLE_CLIENT_SECRET, "redirect_uri": GOOGLE_REDIRECT_URI, "grant_type": "authorization_code"}).encode()
+    request = Request("https://oauth2.googleapis.com/token", data=form, headers={"Content-Type": "application/x-www-form-urlencoded"}, method="POST")
+    with urlopen(request, timeout=30) as response:
+        token = json.loads(response.read().decode("utf-8"))
+    token["expires_at"] = time.time() + int(token.get("expires_in", 3600)) - 60
+    google_tokens = token
+
+
+def google_access_token():
+    global google_tokens
+    if not google_tokens:
+        return None
+    if google_tokens.get("expires_at", 0) > time.time():
+        return google_tokens.get("access_token")
+    refresh_token = google_tokens.get("refresh_token")
+    if not refresh_token:
+        google_tokens = None
+        return None
+    form = urlencode({"client_id": GOOGLE_CLIENT_ID, "client_secret": GOOGLE_CLIENT_SECRET, "refresh_token": refresh_token, "grant_type": "refresh_token"}).encode()
+    request = Request("https://oauth2.googleapis.com/token", data=form, headers={"Content-Type": "application/x-www-form-urlencoded"}, method="POST")
+    with urlopen(request, timeout=30) as response:
+        renewed = json.loads(response.read().decode("utf-8"))
+    renewed["refresh_token"] = refresh_token
+    renewed["expires_at"] = time.time() + int(renewed.get("expires_in", 3600)) - 60
+    google_tokens = renewed
+    return renewed.get("access_token")
+
+
+def append_to_google_sheet(payload):
+    token = google_access_token()
+    if not token:
+        return None
+    spreadsheet_id = spreadsheet_id_from_url(payload.get("sheet_url", ""))
+    fields = payload.get("expense", {})
+    row = [[fields.get("date", ""), fields.get("amount", ""), fields.get("currency", "ARS"), fields.get("description", ""), fields.get("cbu", "Sin dato"), fields.get("payment_method", "Sin dato"), fields.get("category", ""), fields.get("note", "")]]
+    endpoint = f"https://sheets.googleapis.com/v4/spreadsheets/{spreadsheet_id}/values/A:H:append?{urlencode({'valueInputOption':'USER_ENTERED','insertDataOption':'INSERT_ROWS'})}"
+    request = Request(endpoint, data=json.dumps({"majorDimension": "ROWS", "values": row}).encode("utf-8"), headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}, method="POST")
+    with urlopen(request, timeout=30) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def auth_popup_html(message):
+    safe = json.dumps(message, ensure_ascii=False)
+    return f"<!doctype html><html lang='es'><meta charset='utf-8'><title>Google autorizado</title><body><p>{message}</p><script>if(window.opener){{window.opener.postMessage({{type:'google-auth-complete',message:{safe}}},window.location.origin);window.close();}}</script></body></html>"
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         print(f"[{self.log_date_time_string()}] {fmt % args}")
 
     def do_GET(self):
         if self.path == "/api/health":
-            return json_response(self, 200, {"ok": True, "model": MODEL, "api_key_configured": bool(os.getenv("OPENAI_API_KEY"))})
+            return json_response(self, 200, {"ok": True, "model": MODEL, "api_key_configured": bool(os.getenv("OPENAI_API_KEY")), "google_configured": bool(GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET)})
+        if self.path.startswith("/api/google-auth-url"):
+            try:
+                return json_response(self, 200, {"ok": True, "auth_url": google_auth_url()})
+            except Exception as exc:
+                return json_response(self, 500, {"ok": False, "error": str(exc)})
+        if self.path.startswith("/oauth2callback"):
+            query = parse_qs(urlparse(self.path).query)
+            state = query.get("state", [""])[0]
+            code = query.get("code", [""])[0]
+            if not code or state != oauth_state:
+                body = auth_popup_html("No se pudo validar la autorización de Google.")
+                self.send_response(400)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.end_headers()
+                self.wfile.write(body.encode("utf-8"))
+                return
+            try:
+                exchange_google_code(code)
+                body = auth_popup_html("Google autorizado. Esta ventana se cerrará.")
+                self.send_response(200)
+            except Exception as exc:
+                body = auth_popup_html(f"Error de autorización: {exc}")
+                self.send_response(502)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(body.encode("utf-8"))
+            return
         relative = self.path.split("?", 1)[0].lstrip("/") or "index.html"
         path = (ROOT / relative).resolve()
         if ROOT not in path.parents and path != ROOT:
@@ -99,6 +211,25 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_POST(self):
+        if self.path == "/api/google-save":
+            length = int(self.headers.get("Content-Length", "0"))
+            try:
+                payload = json.loads(self.rfile.read(length).decode("utf-8"))
+                if not google_access_token():
+                    return json_response(self, 401, {"ok": False, "auth_required": True, "auth_url": google_auth_url()})
+                result = append_to_google_sheet(payload)
+                return json_response(self, 200, {"ok": True, "saved": True, "result": result})
+            except HTTPError as exc:
+                if exc.code == 401:
+                    global google_tokens
+                    google_tokens = None
+                    return json_response(self, 401, {"ok": False, "auth_required": True, "auth_url": google_auth_url()})
+                detail = exc.read().decode("utf-8", errors="replace")
+                return json_response(self, 502, {"ok": False, "error": "Google Sheets rechazó el guardado.", "detail": detail[:500]})
+            except (ValueError, json.JSONDecodeError) as exc:
+                return json_response(self, 400, {"ok": False, "error": str(exc)})
+            except Exception as exc:
+                return json_response(self, 500, {"ok": False, "error": str(exc)})
         if self.path != "/api/analyze-receipt":
             return json_response(self, 404, {"error": "Endpoint no encontrado."})
         length = int(self.headers.get("Content-Length", "0"))
