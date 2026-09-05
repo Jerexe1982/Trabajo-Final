@@ -7,6 +7,8 @@ Aplicación web de seguimiento personal de gastos y resumen mensual.
 - Registro de gastos con descripción, importe, categoría, fecha y nota.
 - Importación de comprobantes desde imágenes o PDF.
 - Acceso a la cámara del celular mediante captura directa de imágenes.
+- Diseño responsive y controles táctiles para uso desde celular.
+- Metadatos PWA para agregar la aplicación a la pantalla de inicio.
 - Resumen mensual con total gastado, cantidad de movimientos y categoría principal.
 - Distribución visual de gastos por categoría.
 - Historial filtrable y buscable.

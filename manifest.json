@@ -1,0 +1,10 @@
+{
+  "name": "Finanzas claras",
+  "short_name": "Finanzas",
+  "description": "Seguimiento personal de gastos y resumen mensual.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f6faf6",
+  "theme_color": "#1d4f3a",
+  "lang": "es-AR"
+}
