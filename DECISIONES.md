@@ -7,7 +7,7 @@
 3. **Entrada y contexto:** un archivo de imagen o PDF, con hasta diez comprobantes por lote; el agente solo usa la información visible del comprobante.
 4. **Instrucciones y límites:** no inventar datos, marcar ambigüedades, elegir una categoría válida y no afirmar que el gasto fue guardado.
 5. **Salida estructurada:** JSON con `estado`, `campos`, `observaciones` y `preguntas`; los campos son fecha, importe, moneda, comercio_destinatario, cbu_destino, medio_pago, categoria y comentario.
-6. **Handoff y supervisión:** mostrar los resultados en un formulario editable; la persona revisa, corrige, confirma y puede luego editar o borrar una fila antes o después de sincronizarla con Google Sheets.
+6. **Handoff y supervisión:** mostrar los resultados en un formulario editable; la persona revisa, corrige, confirma y puede luego editar o borrar una fila antes o después de sincronizarla con Google Sheets. El agente analiza cada comprobante por separado, incluso dentro de un lote de hasta diez; la aplicación coordina el lote, detecta duplicados, consulta la cotización, solicita OAuth y ejecuta la escritura en Google Sheets solo después de la confirmación humana.
 
 Los textos completos y literales utilizados están en `prompts/system_prompt.md`, `prompts/user_prompt.md` y en la sección **Cómo se lo pedí** del README.
 
