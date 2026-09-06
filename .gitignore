@@ -9,3 +9,5 @@ credentials*.json
 token*.json
 *.pem
 *.key
+iniciar-finanzas.local.ps1
+OPENAI*.txt
