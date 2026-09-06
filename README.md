@@ -140,6 +140,7 @@ Estos prompts también están guardados por separado en `prompts/system_prompt.m
 - Resumen mensual con total gastado, cantidad de movimientos y categoría principal.
 - Distribución visual de gastos por categoría.
 - Búsqueda y eliminación de movimientos.
+- Ordenamiento de movimientos por fecha, monto o rubro, en orden ascendente o descendente.
 - Exportación del período seleccionado a JSON.
 - Importación de imágenes y archivos PDF.
 - Captura directa desde la cámara del celular o la webcam de la computadora.
@@ -157,6 +158,7 @@ Estos prompts también están guardados por separado en `prompts/system_prompt.m
 - Aviso explícito de autenticación temporal antes de abrir Google OAuth; el token se mantiene solo durante la sesión y se elimina al cerrar la ventana.
 - Vista de las planillas ubicadas dentro de la carpeta `Finanzas claras`, con opciones confirmadas para renombrar o enviar una planilla a la papelera de Google Drive.
 - Filtros de año, mes y rubro dentro de la ventana de edición de planilla.
+- Ordenamiento de los registros dentro de la edición de planilla por fecha, monto o rubro, en ambos sentidos.
 - Detección de posibles duplicados por fecha, importe, moneda y comercio antes de guardar.
 - Picklists de rubros, incluyendo Turismo, en la revisión de comprobantes y en la edición de la planilla.
 - Selector de moneda de visualización ARS/USD; la conversión se calcula con una cotización USDT/ARS cercana obtenida de Binance P2P y editable antes de guardar.
@@ -241,7 +243,7 @@ La primera versión abría el explorador de archivos al elegir la opción de cá
 
 La aplicación mantiene una copia local de los gastos confirmados en el navegador y la fuente compartida queda en Google Sheets; todavía no existe una base de datos multiusuario propia. El selector también permite duplicar, renombrar y enviar a la papelera planillas de prueba dentro de `Finanzas claras`.
 
-La integración OAuth, la creación de carpeta/planilla, la lectura, la escritura, la edición, el renombrado, la duplicación, los filtros y el borrado fueron probados con una planilla de prueba; las tres corridas están documentadas en `corridas/`. La cotización consultada es la más cercana disponible al momento de la carga en Binance P2P; no es una serie histórica exacta por fecha. El usuario puede corregirla en el formulario antes de guardar.
+La integración OAuth, la creación de carpeta/planilla, la lectura, la escritura, la edición, el renombrado, la duplicación, los filtros y el borrado fueron probados con una planilla de prueba; las cinco corridas están documentadas en `corridas/`. La cotización consultada es la más cercana disponible al momento de la carga en Binance P2P; no es una serie histórica exacta por fecha. El usuario puede corregirla en el formulario antes de guardar.
 
 Queda pendiente una medición real de `input_tokens` y `output_tokens` con saldo disponible en la cuenta de API; la proyección económica y su fórmula ya están documentadas arriba. También queda pendiente una prueba real de publicación multiusuario. La matriz de niveles, permisos, riesgos y firma quedó documentada en `DECISIONES.md`.
 
