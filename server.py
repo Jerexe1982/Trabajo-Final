@@ -82,7 +82,7 @@ def parse_model_json(text):
 
 def analyze_receipt(payload):
     if DEMO_MODE:
-        return demo_analysis(payload.get("filename", "comprobante"))
+        return demo_analysis(payload.get("filename", "comprobante")), {"demo": True, "input_tokens": 0, "output_tokens": 0}
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
         raise RuntimeError("Falta OPENAI_API_KEY en el entorno del servidor.")
@@ -110,7 +110,8 @@ def analyze_receipt(payload):
     request = Request(API_URL, data=json.dumps(request_body).encode("utf-8"), headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}, method="POST")
     with urlopen(request, timeout=90) as response:
         result = json.loads(response.read().decode("utf-8"))
-    return parse_model_json(extract_output_text(result))
+    usage = result.get("usage", {}) or {}
+    return parse_model_json(extract_output_text(result)), usage
 
 
 def spreadsheet_id_from_url(value):
@@ -339,11 +340,13 @@ def analyze_receipts(payload):
     if not documents or len(documents) > BATCH_MAX:
         raise ValueError("El lote debe contener entre 1 y 10 comprobantes.")
     results = []
+    usage = []
     for document in documents:
-        result = analyze_receipt(document)
+        result, token_usage = analyze_receipt(document)
         result["archivo"] = document.get("filename", "comprobante")
         results.append(result)
-    return results
+        usage.append({"archivo": document.get("filename", "comprobante"), **token_usage})
+    return {"results": results, "usage": usage}
 
 
 def auth_popup_html(message):
@@ -459,8 +462,8 @@ class Handler(BaseHTTPRequestHandler):
                 return json_response(self, 413, {"ok": False, "error": "El lote supera el tamaño máximo permitido."})
             try:
                 payload = json.loads(self.rfile.read(length).decode("utf-8"))
-                result = analyze_receipts(payload)
-                return json_response(self, 200, {"ok": True, "results": result, "count": len(result), "model": MODEL})
+                analysis = analyze_receipts(payload)
+                return json_response(self, 200, {"ok": True, "results": analysis["results"], "usage": analysis["usage"], "count": len(analysis["results"]), "model": MODEL})
             except (ValueError, json.JSONDecodeError) as exc:
                 return json_response(self, 400, {"ok": False, "error": str(exc)})
             except HTTPError as exc:

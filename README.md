@@ -151,7 +151,7 @@ Estos prompts también están guardados por separado en `prompts/system_prompt.m
 - Escritura de la fila confirmada mediante `spreadsheets.values.append`.
 - Selección, análisis y carga en lote de hasta 10 comprobantes por operación.
 - Una única autorización de Google para el lote completo.
-- Importación de un archivo JSON previamente analizado para cargar gastos completos en la aplicación.
+- Importación de un archivo JSON de gastos o de una evidencia descargada del análisis; en este último caso reconstruye los resultados y conserva el nombre del comprobante.
 - Importación directa desde una planilla existente de Google Sheets para actualizar los movimientos y los gráficos.
 - Encabezados estables en Google Sheets (`ID`, fecha, importe, moneda, comercio, categoría, nota y cotización); las planillas legacy reciben una fila de encabezados sin borrar sus datos.
 - Edición y borrado de filas desde la pestaña **Editar planilla**, con confirmación humana y actualización directa de Google Sheets.
@@ -166,6 +166,7 @@ Estos prompts también están guardados por separado en `prompts/system_prompt.m
 - Filtros por uno o varios rubros, vista acumulada o separada y rango de meses desde/hasta.
 - Selector desplegable de rubros con checkboxes para elegir las categorías visibles en el gráfico temporal.
 - Devolución de un JSON estructurado con ocho campos.
+- Visualización del uso de tokens por lote cuando la API lo devuelve, sin exponer la clave.
 - Marcado de resultados como `listo` o `requiere_revision`.
 - Revisión humana antes de registrar el gasto.
 - Formulario editable por comprobante después del análisis y antes del envío a Google Sheets.
@@ -177,7 +178,15 @@ Estos prompts también están guardados por separado en `prompts/system_prompt.m
 
 ## Análisis económico
 
-La aplicación usa `gpt-4.1-mini` porque la tarea necesita leer imágenes/PDF y devolver JSON estructurado, pero no necesita razonamiento complejo ni respuestas extensas. Es el modelo más chico que se probó para este caso y mantiene un costo bajo frente a `gpt-4.1`. La elección se puede revisar si una evaluación real muestra errores de lectura que requieran un modelo mayor.
+La aplicación usa `gpt-4.1-mini` porque la tarea necesita leer imágenes/PDF y devolver JSON estructurado, pero no necesita razonamiento complejo ni respuestas extensas. La elección prioriza el modelo más chico que mantiene lectura multimodal y salida confiable para este caso. La comparación siguiente deja explícito el criterio y el experimento pendiente, sin presentar una prueba no realizada como si fuera real.
+
+| Modelo candidato | Entrada / 1M tokens | Salida / 1M tokens | Decisión |
+| --- | ---: | ---: | --- |
+| `gpt-4.1-nano` | USD 0,10 | USD 0,40 | Alternativa más barata; se debe validar con el mismo fixture porque un error de lectura invalida el ahorro. |
+| `gpt-4.1-mini` | USD 0,40 | USD 1,60 | Elegido: mejor equilibrio esperado entre extracción multimodal, JSON y costo. |
+| `gpt-4.1` | USD 2,00 | USD 8,00 | Descartado para el uso normal: mayor costo sin necesidad de razonamiento adicional demostrada. |
+
+La prueba de comparación reproducible consiste en ejecutar el mismo comprobante anonimizado con `OPENAI_MODEL=gpt-4.1-nano` y `OPENAI_MODEL=gpt-4.1-mini`, conservar las dos respuestas JSON, sus objetos `usage` y revisar fecha, importe, comercio, categoría y validez del JSON. Hasta completar esa corrida con saldo, la tabla es una decisión de diseño basada en tarifas oficiales, no una medición de calidad.
 
 ### Tarifa utilizada
 
@@ -205,7 +214,7 @@ Con ese supuesto, una corrida de un comprobante cuesta aproximadamente **USD 0,0
 
 La proyección anual supone 50 comprobantes por semana durante 52 semanas. No incluye impuestos, eventuales reintentos, cambios futuros de tarifa ni servicios externos. Google Drive/Sheets y la cotización pública usada para USDT/ARS no se incluyen como costo de tokens de OpenAI; sus límites y condiciones deben evaluarse por separado. El modo demo tiene costo **USD 0**, porque no llama a OpenAI.
 
-Para convertir esta estimación en evidencia medida, se debe guardar en la corrida real la cantidad `input_tokens` y `output_tokens` del objeto `usage` de la respuesta API y reemplazar los supuestos de esta tabla por esos valores. Si la cuenta no tiene saldo, la corrida queda documentada como funcional en modo demo y la parte económica como proyección explícita, sin presentar datos simulados como consumo real.
+La respuesta de `POST /api/analyze-receipts` ahora conserva un arreglo `usage` por comprobante, con `input_tokens` y `output_tokens` cuando la API los devuelve. Para convertir esta estimación en evidencia medida, se debe guardar ese bloque JSON junto con la entrada y la salida literal de la corrida y reemplazar los supuestos de esta tabla por esos valores. Si la cuenta no tiene saldo, la corrida queda documentada como funcional en modo demo y la parte económica como proyección explícita, sin presentar datos simulados como consumo real.
 
 Para usar el agente:
 
@@ -235,15 +244,26 @@ py server.py
 
 Al guardar, Google administra la contraseña, la clave y la autenticación. La aplicación nunca solicita ni almacena esas credenciales. La autorización se reutiliza mientras la ventana de la aplicación permanece abierta y se revoca del servidor al cerrarla; al abrir una nueva sesión se vuelve a solicitar autorización. Si no se pega una URL, después de autorizar se listan las planillas disponibles y se elige una. Si se seleccionan varios comprobantes, se analiza cada documento y se agregan todas las filas en una única operación de guardado.
 
-El botón **Importar planilla** permite elegir una planilla de Google Sheets y leer sus filas. La aplicación reconoce el formato actual de once columnas, agrega encabezados a una planilla antigua cuando hace falta y actualiza el resumen, los gráficos y la evolución temporal con esos valores reales. **Importar JSON** queda disponible como alternativa para archivos exportados o previamente analizados.
+El botón **Importar planilla** permite elegir una planilla de Google Sheets y leer sus filas. La aplicación reconoce el formato actual de once columnas, agrega encabezados a una planilla antigua cuando hace falta y actualiza el resumen, los gráficos y la evolución temporal con esos valores reales. **Importar JSON** acepta tanto el exportado de gastos del período como la evidencia descargada después del análisis (`respuesta.results`). El exportado de gastos no contiene los archivos originales: para conservar la trazabilidad de los comprobantes se debe guardar también la evidencia JSON y, si corresponde, el archivo original de forma separada.
 
 ## Qué falta o qué falló
+
+## Respuesta a la evaluación
+
+| Observación del evaluador | Evidencia o mejora incorporada |
+|---|---|
+| Faltaban salidas JSON completas y `usage` por corrida. | El servidor conserva `usage` por comprobante, la interfaz permite descargar la evidencia JSON y `corridas/plantilla-corrida-real.md` define cómo adjuntar entrada y salida literal. |
+| `DECISIONES.md` no mostraba suficiente historia del proceso. | `DECISIONES.md` ahora registra errores literales, cambios antes/después y alternativas descartadas. |
+| La matriz L0–L4 no usaba el vocabulario esperado. | La matriz fue alineada a consultar, proponer, ejecutar con revisión, ejecutar y avisar, y autónomo. L3/L4 están explícitamente deshabilitados. |
+| Faltaban fallas y respuestas operativas. | Se agregó una tabla de fallas previstas, respuesta del sistema, revisión humana y salida esperada. |
+| Faltaba responsable de firma. | Exequiel Pinto figura como propietario, operador y firmante de las acciones sobre Sheets. |
+| El análisis económico no comparaba modelos. | README compara `gpt-4.1-nano`, `gpt-4.1-mini` y `gpt-4.1`, con criterio, tarifas y procedimiento para una prueba controlada. |
 
 La primera versión abría el explorador de archivos al elegir la opción de cámara en la computadora. El motivo fue que `capture="environment"` funciona principalmente como captura directa en celulares y no inicializa necesariamente la webcam en un navegador de escritorio. Se corrigió agregando `getUserMedia`, una vista previa de cámara y un botón para tomar la foto.
 
 La aplicación mantiene una copia local de los gastos confirmados en el navegador y la fuente compartida queda en Google Sheets; todavía no existe una base de datos multiusuario propia. El selector también permite duplicar, renombrar y enviar a la papelera planillas de prueba dentro de `Finanzas claras`.
 
-La integración OAuth, la creación de carpeta/planilla, la lectura, la escritura, la edición, el renombrado, la duplicación, los filtros y el borrado fueron probados con una planilla de prueba; las cinco corridas están documentadas en `corridas/`. La cotización consultada es la más cercana disponible al momento de la carga en Binance P2P; no es una serie histórica exacta por fecha. El usuario puede corregirla en el formulario antes de guardar.
+La integración OAuth, la creación de carpeta/planilla, la lectura, la escritura, la edición, el renombrado, la duplicación, los filtros y el borrado fueron probados con una planilla de prueba; las seis corridas están documentadas en `corridas/`. La corrida 06 agrega el consumo real de tokens y su costo calculado. La cotización consultada es la más cercana disponible al momento de la carga en Binance P2P; no es una serie histórica exacta por fecha. El usuario puede corregirla en el formulario antes de guardar.
 
 Queda pendiente una medición real de `input_tokens` y `output_tokens` con saldo disponible en la cuenta de API; la proyección económica y su fórmula ya están documentadas arriba. También queda pendiente una prueba real de publicación multiusuario. La matriz de niveles, permisos, riesgos y firma quedó documentada en `DECISIONES.md`.
 

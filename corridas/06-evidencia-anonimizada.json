@@ -1,0 +1,30 @@
+{
+  "fecha": "2026-09-07T01:02:48.480Z",
+  "modelo": "gpt-4.1-mini",
+  "entrada": [
+    {"nombre": "comprobante-01.pdf", "tipo": "application/pdf", "tamano_bytes": 21490},
+    {"nombre": "comprobante-02.pdf", "tipo": "application/pdf", "tamano_bytes": 21644},
+    {"nombre": "comprobante-03.pdf", "tipo": "application/pdf", "tamano_bytes": 21645},
+    {"nombre": "comprobante-04.pdf", "tipo": "application/pdf", "tamano_bytes": 37818},
+    {"nombre": "comprobante-05.pdf", "tipo": "application/pdf", "tamano_bytes": 37863}
+  ],
+  "respuesta": {
+    "ok": true,
+    "results": [
+      {"estado": "listo", "campos": {"fecha": "2026-09-01", "importe": 3441000, "moneda": "ARS", "comercio_destinatario": "DESTINATARIO REDACTADO 1", "cbu_destino": "REDACTADO", "medio_pago": "BBVA Móvil", "categoria": "Transferencias / pagos varios", "comentario": "Transferencia con concepto redactado", "cotizacion_usdt_ars": 1579.91}, "observaciones": [], "preguntas": [], "archivo": "comprobante-01.pdf"},
+      {"estado": "listo", "campos": {"fecha": "2026-08-26", "importe": 45000, "moneda": "ARS", "comercio_destinatario": "DESTINATARIO REDACTADO 2", "cbu_destino": "REDACTADO", "medio_pago": "BBVA Móvil", "categoria": "Transferencias / pagos varios", "comentario": "Transferencia con concepto redactado", "cotizacion_usdt_ars": 1579.91}, "observaciones": [], "preguntas": [], "archivo": "comprobante-02.pdf"},
+      {"estado": "listo", "campos": {"fecha": "2026-09-02", "importe": 45000, "moneda": "ARS", "comercio_destinatario": "DESTINATARIO REDACTADO 2", "cbu_destino": "REDACTADO", "medio_pago": "BBVA Móvil", "categoria": "Transferencias / pagos varios", "comentario": "Transferencia con concepto redactado", "cotizacion_usdt_ars": 1579.91}, "observaciones": [], "preguntas": [], "archivo": "comprobante-03.pdf"},
+      {"estado": "listo", "campos": {"fecha": "2026-09-04", "importe": 40626, "moneda": "ARS", "comercio_destinatario": "COMERCIO REDACTADO 1", "cbu_destino": "Sin dato", "medio_pago": "VISA", "categoria": "Vivienda y servicios", "comentario": "Pago de servicio redactado", "cotizacion_usdt_ars": 1579.91}, "observaciones": [], "preguntas": [], "archivo": "comprobante-04.pdf"},
+      {"estado": "listo", "campos": {"fecha": "2026-07-31", "importe": 50141, "moneda": "ARS", "comercio_destinatario": "COMERCIO REDACTADO 2", "cbu_destino": "Sin dato", "medio_pago": "VISA", "categoria": "Impuestos y tasas", "comentario": "Pago de impuesto redactado", "cotizacion_usdt_ars": 1579.91}, "observaciones": [], "preguntas": [], "archivo": "comprobante-05.pdf"}
+    ],
+    "count": 5,
+    "model": "gpt-4.1-mini",
+    "usage": [
+      {"archivo": "comprobante-01.pdf", "input_tokens": 2209, "output_tokens": 141},
+      {"archivo": "comprobante-02.pdf", "input_tokens": 2212, "output_tokens": 136},
+      {"archivo": "comprobante-03.pdf", "input_tokens": 2212, "output_tokens": 142},
+      {"archivo": "comprobante-04.pdf", "input_tokens": 2219, "output_tokens": 117},
+      {"archivo": "comprobante-05.pdf", "input_tokens": 2231, "output_tokens": 123}
+    ]
+  }
+}
