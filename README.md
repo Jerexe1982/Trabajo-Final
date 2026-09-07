@@ -178,7 +178,7 @@ Estos prompts también están guardados por separado en `prompts/system_prompt.m
 
 ## Análisis económico
 
-La aplicación usa `gpt-4.1-mini` porque la tarea necesita leer imágenes/PDF y devolver JSON estructurado, pero no necesita razonamiento complejo ni respuestas extensas. La elección prioriza el modelo más chico que mantiene lectura multimodal y salida confiable para este caso. La comparación siguiente deja explícito el criterio y el experimento pendiente, sin presentar una prueba no realizada como si fuera real.
+La aplicación usa `gpt-4.1-mini` porque la tarea necesita leer imágenes/PDF y devolver JSON estructurado, pero no necesita razonamiento complejo ni respuestas extensas. La elección prioriza el modelo más chico que mantiene lectura multimodal y salida confiable para este caso. La comparación controlada de la corrida 07 confirmó que ambos modelos producen JSON válido, pero `gpt-4.1-mini` clasificó el comprobante con mayor especificidad.
 
 | Modelo candidato | Entrada / 1M tokens | Salida / 1M tokens | Decisión |
 | --- | ---: | ---: | --- |
@@ -186,7 +186,7 @@ La aplicación usa `gpt-4.1-mini` porque la tarea necesita leer imágenes/PDF y 
 | `gpt-4.1-mini` | USD 0,40 | USD 1,60 | Elegido: mejor equilibrio esperado entre extracción multimodal, JSON y costo. |
 | `gpt-4.1` | USD 2,00 | USD 8,00 | Descartado para el uso normal: mayor costo sin necesidad de razonamiento adicional demostrada. |
 
-La prueba de comparación reproducible consiste en ejecutar el mismo comprobante anonimizado con `OPENAI_MODEL=gpt-4.1-nano` y `OPENAI_MODEL=gpt-4.1-mini`, conservar las dos respuestas JSON, sus objetos `usage` y revisar fecha, importe, comercio, categoría y validez del JSON. Hasta completar esa corrida con saldo, la tabla es una decisión de diseño basada en tarifas oficiales, no una medición de calidad.
+La comparación se ejecutó con el mismo comprobante anonimizado y los mismos prompts usando `OPENAI_MODEL=gpt-4.1-nano` y `OPENAI_MODEL=gpt-4.1-mini`. Se conservaron los objetos `usage` y se revisaron fecha, importe, moneda, categoría y validez del JSON. El detalle está en `corridas/07-comparacion-modelos.md`.
 
 ### Tarifa utilizada
 
@@ -263,7 +263,7 @@ La primera versión abría el explorador de archivos al elegir la opción de cá
 
 La aplicación mantiene una copia local de los gastos confirmados en el navegador y la fuente compartida queda en Google Sheets; todavía no existe una base de datos multiusuario propia. El selector también permite duplicar, renombrar y enviar a la papelera planillas de prueba dentro de `Finanzas claras`.
 
-La integración OAuth, la creación de carpeta/planilla, la lectura, la escritura, la edición, el renombrado, la duplicación, los filtros y el borrado fueron probados con una planilla de prueba; las seis corridas están documentadas en `corridas/`. La corrida 06 agrega el consumo real de tokens y su costo calculado. La cotización consultada es la más cercana disponible al momento de la carga en Binance P2P; no es una serie histórica exacta por fecha. El usuario puede corregirla en el formulario antes de guardar.
+La integración OAuth, la creación de carpeta/planilla, la lectura, la escritura, la edición, el renombrado, la duplicación, los filtros y el borrado fueron probados con una planilla de prueba; las siete corridas están documentadas en `corridas/`. La corrida 06 agrega el consumo real de tokens y su costo calculado; la corrida 07 agrega la comparación real de modelos. La cotización consultada es la más cercana disponible al momento de la carga en Binance P2P; no es una serie histórica exacta por fecha. El usuario puede corregirla en el formulario antes de guardar.
 
 Queda pendiente una medición real de `input_tokens` y `output_tokens` con saldo disponible en la cuenta de API; la proyección económica y su fórmula ya están documentadas arriba. También queda pendiente una prueba real de publicación multiusuario. La matriz de niveles, permisos, riesgos y firma quedó documentada en `DECISIONES.md`.
 
