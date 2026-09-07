@@ -1,0 +1,5 @@
+{
+  "metadata": {"fecha_corrida": "2026-09-07T01:33:02.713590Z", "modelo": "gpt-4.1-mini", "http_status": 200, "input_tokens": 2211, "output_tokens": 121, "tamano_entrada_bytes": 37643},
+  "entrada": {"archivo": "pago Metrogas 2026-08-10.pdf", "tipo": "application/pdf", "datos_anonimizados": {"fecha_visible": "2026-08-10", "importe_visible": 20017, "moneda_visible": "ARS", "comercio": "SERVICIO REDACTADO", "categoria_esperada": "Vivienda y servicios"}},
+  "salida_anonimizada": {"estado": "listo", "campos": {"fecha": "2026-08-10", "importe": 20017, "moneda": "ARS", "comercio_destinatario": "SERVICIO REDACTADO", "cbu_destino": "Sin dato", "medio_pago": "REDACTADO", "categoria": "Vivienda y servicios", "comentario": "Pago de servicio redactado"}, "observaciones": [], "preguntas": []}
+}

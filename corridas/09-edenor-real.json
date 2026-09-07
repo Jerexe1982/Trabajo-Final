@@ -1,0 +1,5 @@
+{
+  "metadata": {"fecha_corrida": "2026-09-07T01:32:59.541029Z", "modelo": "gpt-4.1-mini", "http_status": 200, "input_tokens": 2210, "output_tokens": 158, "tamano_entrada_bytes": 37634},
+  "entrada": {"archivo": "pago Edenor 2026-08-27.pdf", "tipo": "application/pdf", "datos_anonimizados": {"fecha_visible": "2026-08-27", "importe_visible": 16034.49, "moneda_visible": "ARS", "comercio": "SERVICIO REDACTADO", "categoria_esperada": "Vivienda y servicios"}},
+  "salida_anonimizada": {"estado": "listo", "campos": {"fecha": "2026-08-27", "importe": 16034.49, "moneda": "ARS", "comercio_destinatario": "SERVICIO REDACTADO", "cbu_destino": "Sin dato", "medio_pago": "REDACTADO", "categoria": "Vivienda y servicios", "comentario": "Importe con decimales interpretado según el comprobante"}, "observaciones": ["El importe incluye decimales con coma, se interpretó como 16034.49", "No se especifica CBU destino en el comprobante"], "preguntas": []}
+}
