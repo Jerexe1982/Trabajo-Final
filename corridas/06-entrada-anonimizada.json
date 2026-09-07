@@ -1,0 +1,11 @@
+{
+  "tipo": "fixture de entrada anonimizado",
+  "origen": "lote real de cinco comprobantes PDF; los archivos originales se conservan fuera del repositorio",
+  "documentos": [
+    {"archivo": "comprobante-01.pdf", "tipo": "application/pdf", "contenido_visible": {"fecha": "2026-09-01", "importe": 3441000, "moneda": "ARS", "destinatario": "DESTINATARIO REDACTADO 1", "categoria_esperada": "Transferencias / pagos varios"}},
+    {"archivo": "comprobante-02.pdf", "tipo": "application/pdf", "contenido_visible": {"fecha": "2026-08-26", "importe": 45000, "moneda": "ARS", "destinatario": "DESTINATARIO REDACTADO 2", "categoria_esperada": "Transferencias / pagos varios"}},
+    {"archivo": "comprobante-03.pdf", "tipo": "application/pdf", "contenido_visible": {"fecha": "2026-09-02", "importe": 45000, "moneda": "ARS", "destinatario": "DESTINATARIO REDACTADO 2", "categoria_esperada": "Transferencias / pagos varios"}},
+    {"archivo": "comprobante-04.pdf", "tipo": "application/pdf", "contenido_visible": {"fecha": "2026-09-04", "importe": 40626, "moneda": "ARS", "comercio": "COMERCIO REDACTADO 1", "categoria_esperada": "Vivienda y servicios"}},
+    {"archivo": "comprobante-05.pdf", "tipo": "application/pdf", "contenido_visible": {"fecha": "2026-07-31", "importe": 50141, "moneda": "ARS", "comercio": "COMERCIO REDACTADO 2", "categoria_esperada": "Impuestos y tasas"}}
+  ]
+}

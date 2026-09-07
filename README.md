@@ -186,7 +186,7 @@ La aplicación usa `gpt-4.1-mini` porque la tarea necesita leer imágenes/PDF y 
 | `gpt-4.1-mini` | USD 0,40 | USD 1,60 | Elegido: mejor equilibrio esperado entre extracción multimodal, JSON y costo. |
 | `gpt-4.1` | USD 2,00 | USD 8,00 | Descartado para el uso normal: mayor costo sin necesidad de razonamiento adicional demostrada. |
 
-La comparación se ejecutó con el mismo comprobante anonimizado y los mismos prompts usando `OPENAI_MODEL=gpt-4.1-nano` y `OPENAI_MODEL=gpt-4.1-mini`. Se conservaron los objetos `usage` y se revisaron fecha, importe, moneda, categoría y validez del JSON. El detalle está en `corridas/07-comparacion-modelos.md`.
+La comparación se ejecutó con el mismo comprobante anonimizado y los mismos prompts usando `OPENAI_MODEL=gpt-4.1-nano` y `OPENAI_MODEL=gpt-4.1-mini`. Se conservaron los objetos `usage` y se revisaron fecha, importe, moneda, categoría y validez del JSON. El fixture público está en `corridas/07-entrada-fixture.json` y el detalle en `corridas/07-comparacion-modelos.md`.
 
 ### Tarifa utilizada
 
@@ -215,6 +215,12 @@ Con ese supuesto, una corrida de un comprobante cuesta aproximadamente **USD 0,0
 La proyección anual supone 50 comprobantes por semana durante 52 semanas. No incluye impuestos, eventuales reintentos, cambios futuros de tarifa ni servicios externos. Google Drive/Sheets y la cotización pública usada para USDT/ARS no se incluyen como costo de tokens de OpenAI; sus límites y condiciones deben evaluarse por separado. El modo demo tiene costo **USD 0**, porque no llama a OpenAI.
 
 La respuesta de `POST /api/analyze-receipts` ahora conserva un arreglo `usage` por comprobante, con `input_tokens` y `output_tokens` cuando la API los devuelve. Para convertir esta estimación en evidencia medida, se debe guardar ese bloque JSON junto con la entrada y la salida literal de la corrida y reemplazar los supuestos de esta tabla por esos valores. Si la cuenta no tiene saldo, la corrida queda documentada como funcional en modo demo y la parte económica como proyección explícita, sin presentar datos simulados como consumo real.
+
+### RECÁLCULO de las corridas medidas
+
+Para la corrida 06: `(11.083 / 1.000.000 × 0,40) + (659 / 1.000.000 × 1,60) = USD 0,005488`.
+
+Para la comparación de la corrida 07: `gpt-4.1-nano = USD 0,0003241` y `gpt-4.1-mini = USD 0,0010748`, redondeados respectivamente a USD 0,000324 y USD 0,001075. Los insumos están en los JSON y Markdown de `corridas/`.
 
 Para usar el agente:
 

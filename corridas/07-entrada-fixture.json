@@ -1,0 +1,14 @@
+{
+  "tipo": "fixture de comparación",
+  "archivo": "comprobante-servicio-anonimizado.pdf",
+  "tipo_mime": "application/pdf",
+  "contenido_visible": {
+    "fecha": "2026-09-04",
+    "importe": 40626,
+    "moneda": "ARS",
+    "comercio": "COMERCIO REDACTADO 1",
+    "medio_pago": "VISA",
+    "categoria_esperada": "Vivienda y servicios"
+  },
+  "prompts": ["prompts/system_prompt.md", "prompts/user_prompt.md"]
+}

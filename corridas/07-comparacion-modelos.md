@@ -2,6 +2,7 @@
 
 - **Fecha:** 2026-09-07
 - **Entrada común:** el mismo PDF anonimizado de un comprobante de servicio.
+- **Fixture público:** [`07-entrada-fixture.json`](07-entrada-fixture.json).
 - **Prompt:** el mismo `prompts/system_prompt.md` y `prompts/user_prompt.md`.
 - **Cambios entre pruebas:** únicamente `OPENAI_MODEL`.
 - **Modo:** real, no demo.
@@ -32,3 +33,17 @@ Para `gpt-4.1-mini` se aplicaron USD 0,40/M de entrada y USD 1,60/M de salida:
 ```
 
 La entrada y los resultados con datos personales se conservan fuera del repositorio. Este documento contiene únicamente la comparación anonimizada necesaria para reproducir la decisión.
+
+## RECÁLCULO
+
+```text
+gpt-4.1-nano:
+(2.649 / 1.000.000 × 0,10) + (148 / 1.000.000 × 0,40)
+= USD 0,0003241 → USD 0,000324 declarado
+
+gpt-4.1-mini:
+(2.219 / 1.000.000 × 0,40) + (117 / 1.000.000 × 1,60)
+= USD 0,0010748 → USD 0,001075 declarado
+
+Desvío por redondeo: menor al 0,05 % en ambos casos.
+```

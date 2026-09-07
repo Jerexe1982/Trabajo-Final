@@ -7,6 +7,7 @@
 - **Resultado:** los 5 comprobantes fueron analizados y quedaron disponibles para revisión editable.
 - **Evidencia JSON completa:** archivo local descargado como `evidencia-analisis-2026-09-07T01-02-48-481Z.json`.
 - **Evidencia pública anonimizada:** [`06-evidencia-anonimizada.json`](06-evidencia-anonimizada.json).
+- **Entrada pública anonimizada:** [`06-entrada-anonimizada.json`](06-entrada-anonimizada.json).
 
 ## Consumo medido
 
@@ -26,3 +27,15 @@ Con las tarifas documentadas para `gpt-4.1-mini` — USD 0,40 por millón de tok
 ## Trazabilidad
 
 La evidencia descargada conserva la fecha, el modelo, los nombres y tamaños de los archivos, los resultados completos y el arreglo `respuesta.usage` por comprobante. El archivo contiene datos personales extraídos de comprobantes, por lo que no se copia sin anonimizar al repositorio público; se conserva localmente como respaldo de la corrida.
+
+La entrada pública reemplaza los PDF personales por los campos visibles necesarios para rehacer los números principales de la salida: cantidad de documentos, fechas, importes y monedas.
+
+## RECÁLCULO
+
+```text
+Tokens de entrada: 11.083 (suma de corridas/06-evidencia-anonimizada.json)
+Tokens de salida: 659 (suma de corridas/06-evidencia-anonimizada.json)
+Costo: (11.083 / 1.000.000 × 0,40) + (659 / 1.000.000 × 1,60)
+Costo recalculado: USD 0,005488
+Desvío respecto de lo declarado: 0 %
+```
