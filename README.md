@@ -2,7 +2,7 @@
 
 ## Qué construí
 
-Construí una aplicación web de seguimiento personal de gastos y resumen mensual. Permite registrar gastos, consultar la distribución por categorías, buscar movimientos y exportar el período en JSON. También permite importar comprobantes en imagen o PDF, usar la cámara de la computadora o del celular y solicitarle a un agente que proponga los datos del gasto antes de guardarlo.
+Construí una aplicación web de seguimiento personal de gastos y resumen mensual. Permite registrar gastos, consultar la distribución por categorías, buscar movimientos y exportar el período en JSON. También permite importar comprobantes en imagen o PDF, usar una cámara compatible desde el navegador y solicitarle a un agente que proponga los datos del gasto antes de guardarlo.
 
 La aplicación está pensada para una persona que quiere registrar sus gastos cotidianos sin completar manualmente todos los campos y manteniendo una revisión humana antes de confirmar.
 
@@ -143,7 +143,7 @@ Estos prompts también están guardados por separado en `prompts/system_prompt.m
 - Ordenamiento de movimientos por fecha, monto o rubro, en orden ascendente o descendente.
 - Exportación del período seleccionado a JSON.
 - Importación de imágenes y archivos PDF.
-- Captura directa desde la cámara del celular o la webcam de la computadora.
+- Captura desde una cámara compatible con el navegador.
 - Análisis multimodal mediante `server.py` y la Responses API.
 - Selección de la planilla de destino desde los archivos de Google Drive después de autenticarte; la URL queda como alternativa opcional.
 - Primera configuración: crea la carpeta `Finanzas claras` en Google Drive y una nueva planilla con el nombre elegido por la persona.
@@ -172,7 +172,7 @@ Estos prompts también están guardados por separado en `prompts/system_prompt.m
 - Formulario editable por comprobante después del análisis y antes del envío a Google Sheets.
 - Inicio limpio de la aplicación sin registros de ejemplo; el destino seleccionado se conserva durante la sesión local para no perderlo al recargar.
 - Persistencia local mediante `localStorage`.
-- Diseño responsive y metadatos PWA para uso desde un celular.
+- Diseño adaptable para distintos tamaños de ventana del navegador.
 - Modo demo reproducible para evaluación: genera datos sintéticos, no llama a OpenAI, no autentica Google y no envía archivos personales.
 - Contrato operativo de seis piezas y matriz de supervisión humana L0–L4 documentados en `DECISIONES.md`.
 
@@ -265,7 +265,7 @@ El botón **Importar planilla** permite elegir una planilla de Google Sheets y l
 | Faltaba responsable de firma. | Exequiel Pinto figura como propietario, operador y firmante de las acciones sobre Sheets. |
 | El análisis económico no comparaba modelos. | README compara `gpt-4.1-nano`, `gpt-4.1-mini` y `gpt-4.1`, con criterio, tarifas y procedimiento para una prueba controlada. |
 
-La primera versión abría el explorador de archivos al elegir la opción de cámara en la computadora. El motivo fue que `capture="environment"` funciona principalmente como captura directa en celulares y no inicializa necesariamente la webcam en un navegador de escritorio. Se corrigió agregando `getUserMedia`, una vista previa de cámara y un botón para tomar la foto.
+La primera versión abría el explorador de archivos al elegir la opción de cámara. El motivo fue que `capture="environment"` no inicializa necesariamente una cámara en todos los navegadores. Se corrigió agregando `getUserMedia`, una vista previa de cámara y un botón para tomar la foto.
 
 La aplicación mantiene una copia local de los gastos confirmados en el navegador y la fuente compartida queda en Google Sheets; todavía no existe una base de datos multiusuario propia. El selector también permite duplicar, renombrar y enviar a la papelera planillas de prueba dentro de `Finanzas claras`.
 
@@ -277,4 +277,4 @@ La prueba completa contra la API requiere una clave válida en `OPENAI_API_KEY` 
 
 ## Qué aprendí
 
-Aprendí que una aplicación útil no se resuelve solamente con un prompt: necesita una interfaz, un contrato de salida, una herramienta real y una instancia clara de revisión humana. También entendí que pedir JSON estricto ayuda a conectar el resultado del agente con otros componentes de software. Las pruebas con cámara y archivos mostraron que una misma funcionalidad puede comportarse distinto en celular y computadora. Finalmente, aprendí que documentar fallas y decisiones es tan importante como mostrar la versión que funciona.
+Aprendí que una aplicación útil no se resuelve solamente con un prompt: necesita una interfaz, un contrato de salida, una herramienta real y una instancia clara de revisión humana. También entendí que pedir JSON estricto ayuda a conectar el resultado del agente con otros componentes de software. Las pruebas con cámara y archivos mostraron que una misma funcionalidad puede comportarse distinto según el navegador y el dispositivo. Finalmente, aprendí que documentar fallas y decisiones es tan importante como mostrar la versión que funciona.
